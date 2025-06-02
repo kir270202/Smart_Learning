@@ -39,7 +39,6 @@
 
 <script>
 import TopBar from '@/components/TopBar.vue'
-import { TestFactory } from '@/helpers/TestFactory'
 
 export default {
   name: 'Home',
@@ -50,8 +49,7 @@ export default {
     }
   },
   created() {
-    // lädt alle Tests inklusive count
-    this.tests = new TestFactory().load()
+    this.tests = this.$testService.getTests()
   }
 }
 </script>

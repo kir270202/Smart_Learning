@@ -96,7 +96,6 @@
 <script>
 import Qti3Player from 'qti3-item-player'
 import 'qti3-item-player/dist/qti3Player.css'
-import { TestControllerUtilities } from '@/helpers/TestControllerUtilities'
 import TopBar from '@/components/TopBar.vue';
 
 export default {
@@ -104,7 +103,6 @@ export default {
   components: { Qti3Player, TopBar },
   data() {
     return {
-      TC: null,
       qti3player: null,
       test: null,
       testItems: [],
@@ -125,9 +123,8 @@ export default {
   },
   methods: {
     async loadTest(id) {
-      this.test = this.TC.getTestById(id);
-      await this.TC.loadItems(this.test.items);
-      this.testItems = this.TC.getItems();
+      this.test = this.$testService.getTestById(id)
+      this.testItems = await this.$testService.loadQuestionItems(this.test.items);
       this.itemsLoaded = true;
       this.tryLoadItem();
     },
@@ -272,7 +269,7 @@ export default {
 
   },
   created() {
-    this.TC = new TestControllerUtilities();
+    //
   },
   mounted() {
     this.loadTest(this.$route.params.id);
