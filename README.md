@@ -5,7 +5,9 @@ go to ```/backend``` and then run:
 ``` python -m venv .venv ```
 
 in ```/backend``` install the requirements.txt
-```pip install -r requirements.txt```
+```sh
+pip install -r requirements.txt
+```
 
 ## Setup
 
