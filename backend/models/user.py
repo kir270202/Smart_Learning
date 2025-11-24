@@ -1,3 +1,4 @@
+<<<<<<< HEAD
 from datetime import datetime
 from typing import Optional
 from pydantic import EmailStr
@@ -35,3 +36,5 @@ class LoginInput(SQLModel):
     identifier: str
     password: str
 
+=======
+>>>>>>> 9baf133 (create the API-Endpoints and DB-Models)
