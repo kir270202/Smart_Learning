@@ -1,8 +1,8 @@
 from typing import List
 from fastapi import APIRouter, HTTPException, Depends
-from sqlmodel import Session, select
+from sqlmodel import SQLModel, Session, select
 from database import get_session
-from models.user import User, UserCreate, UserRead, UserUpdate
+from models.user import User, UserCreate, UserRead, UserUpdate, LoginInput
 import bcrypt
 
 router = APIRouter(prefix="/users", tags=["users"])
@@ -24,21 +24,11 @@ def create_user(
     username_exists = session.exec(select(User).where(User.username == user_create.username)).first()
     if username_exists:
         raise HTTPException(status_code=400, detail="Username already taken")
-
-    first_name_exists = session.exec(select(User).where(User.first_name == user_create.first_name)).first()
-    if first_name_exists:
-        raise HTTPException(status_code=400, detail="First name already in use")
-    
-    last_name_exists = session.exec(select(User).where(User.last_name == user_create.last_name)).first()
-    if last_name_exists:
-        raise HTTPException(status_code=400, detail="Last name already in use")
     
     hashed_password = hash_password(user_create.password)
     
     db_user = User(
         username=user_create.username,
-        first_name=user_create.first_name,
-        last_name=user_create.last_name,
         email=user_create.email,
         password=hashed_password
     )
@@ -86,12 +76,6 @@ def update_user(
         if email_exists:
             raise HTTPException(status_code=400, detail="Email already registered")
         user.email = user_update.email
-    
-    if user_update.first_name is not None:
-        user.first_name = user_update.first_name
-    
-    if user_update.last_name is not None:
-        user.last_name = user_update.last_name
 
     if user_update.password is not None:
         user.password = hash_password(user_update.password)
@@ -115,13 +99,17 @@ def delete_user(
     return None
 
 @router.post("/login")
-def login_user(
-    email: str,
-    password: str,
+def login_user( 
+    login_data: LoginInput,
     session: Session = Depends(get_session)
 ):
-    user = session.exec(select(User).where(User.email == email)).first()
+    identifier = login_data.identifier
+    password = login_data.password
+    user = session.exec(select(User).where(
+        (User.email == identifier) | (User.username == identifier))
+    ).first()
+
     if not user or not bcrypt.checkpw(password.encode('utf-8'), user.password.encode('utf-8')):
-        raise HTTPException(status_code=401, detail="Invalid email or password")
+        raise HTTPException(status_code=401, detail="Invalid email/username or password")
     
     return {"message": "Login successful", "user_id": user.id}

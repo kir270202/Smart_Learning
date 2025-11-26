@@ -6,8 +6,6 @@ from sqlmodel import SQLModel, Field
 # Base model for user with common fields
 class UserBase(SQLModel):
     username: str = Field(nullable=False, unique=True)
-    first_name: Optional[str] = Field(nullable=False)
-    last_name: Optional[str] = Field(nullable=False)
     email: EmailStr = Field(nullable=False, unique=True) # Email wird in DB als String gespeichert, aber mit EmailStr validiert
 
 # User model extending the base with additional fields
@@ -34,4 +32,8 @@ class UserUpdate(SQLModel):
     last_name: Optional[str] = None
     email: Optional[EmailStr] = None
     password: Optional[str] = None
+
+class LoginInput(SQLModel):
+    identifier: str
+    password: str
 
