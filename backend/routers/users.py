@@ -25,20 +25,10 @@ def create_user(
     if username_exists:
         raise HTTPException(status_code=400, detail="Username already taken")
 
-
-    first_name_exists = session.exec(select(User).where(User.first_name == user_create.first_name)).first()
-    if first_name_exists:
-        raise HTTPException(status_code=400, detail="First name already in use")
-    
-    last_name_exists = session.exec(select(User).where(User.last_name == user_create.last_name)).first()
-    if last_name_exists:
-        raise HTTPException(status_code=400, detail="Last name already in use")
-
     hashed_password = hash_password(user_create.password)
     
     db_user = User(
         username=user_create.username,
-
         email=user_create.email,
         password=hashed_password
     )
