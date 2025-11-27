@@ -33,12 +33,12 @@ def read_subjects(
     subjects = session.exec(select(Subject)).all()
     return subjects
 
-@router.get("/{user_id}", response_model=List[SubjectRead])
+@router.get("/byUser/{user_id}", response_model=List[SubjectRead])
 def read_subjects_of_user(
     user_id: int,
     session: Session = Depends(get_session)
 ):
-    subjects = session.get(Subject, user_id)
+    subjects = session.exec(select(Subject).where(Subject.user_id == user_id)).all()
     if not subjects:
         raise HTTPException(status_code=404, detail="User not found")
     return subjects
