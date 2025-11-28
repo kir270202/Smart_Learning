@@ -1,6 +1,6 @@
 from typing import List
 from fastapi import APIRouter, HTTPException, Depends
-from sqlmodel import SQLModel, Session, select
+from sqlmodel import select
 from database import SessionDep
 from models.subject import Subject, SubjectCreate, SubjectRead, SubjectUpdate
 
