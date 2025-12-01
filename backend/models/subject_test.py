@@ -11,6 +11,5 @@ class SubjectTestBase(SQLModel):
 
 class SubjectTest(SubjectTestBase, table=True):
     id: Optional[int] = Field(default=None, primary_key=True)
-
     created_at: datetime = Field(default_factory=datetime.utcnow, nullable=False)
     updated_at: datetime = Field(default_factory=datetime.utcnow, nullable=False)
