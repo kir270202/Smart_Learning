@@ -4,6 +4,7 @@ from sqlmodel import select
 from database import SessionDep
 from config.logger_config import logger
 from models.subject import Subject, SubjectCreate, SubjectRead, SubjectUpdate
+from models.user import User
 
 router = APIRouter(prefix="/subjects", tags=["subjects"])
 
@@ -12,15 +13,17 @@ def create_subject(
     subject_create: SubjectCreate,
     session: SessionDep
 ):
-    subject_with_user_id = session.exec(select(Subject).where(Subject.user_id == subject_create.user_id)).all()
-    if not subject_with_user_id:
+    user_id_exists = session.exec(select(User).where(User.id == subject_create.user_id)).first()
+    if not user_id_exists:
         logger.warning(f"User {subject_create.user_id} does not exist, no subject created")
         raise HTTPException(status_code=400, detail="User does not exist")
-
-    for entry in subject_with_user_id:
-        if entry.name == subject_create.name:
-            logger.warning(f"User {subject_create.user_id} already has subject with name {subject_create.name}")
-            raise HTTPException(status_code=400, detail="User already has subject with this name")
+    
+    subject_user_id_comb_exist = session.exec(select(Subject)
+                                              .where(Subject.name == subject_create.name)
+                                              .where(Subject.id == subject_create.user_id)).first()
+    if subject_user_id_comb_exist:
+        logger.warning(f"User {subject_create.user_id} already has subject with name {subject_create.name}")
+        raise HTTPException(status_code=400, detail="User already has subject with this name")
     
     db_subject = Subject(
         name=subject_create.name,
