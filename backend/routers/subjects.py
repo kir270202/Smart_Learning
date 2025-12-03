@@ -12,11 +12,15 @@ def create_subject(
     subject_create: SubjectCreate,
     session: SessionDep
 ):
-    name_exists = session.exec(select(Subject).where(Subject.name == subject_create.name)).first()
-    subject_user_id_exists = session.exec(select(Subject).where(Subject.user_id == subject_create.user_id)).first()
-    if name_exists and subject_user_id_exists:
-        logger.warning(f"User {subject_create.user_id} already has subject with name {subject_create.name}")
-        raise HTTPException(status_code=400, detail="User already has subject with this name")
+    subject_with_user_id = session.exec(select(Subject).where(Subject.user_id == subject_create.user_id)).all()
+    if not subject_with_user_id:
+        logger.warning(f"User {subject_create.user_id} does not exist, no subject created")
+        raise HTTPException(status_code=400, detail="User does not exist")
+
+    for entry in subject_with_user_id:
+        if entry.name == subject_create.name:
+            logger.warning(f"User {subject_create.user_id} already has subject with name {subject_create.name}")
+            raise HTTPException(status_code=400, detail="User already has subject with this name")
     
     db_subject = Subject(
         name=subject_create.name,
@@ -69,10 +73,10 @@ def update_subject(
         logger.warning(f"Subject {subject_id} does not exist, so no update")
         raise HTTPException(status_code=404, detail="Subject not found")
     
-    # Check if user of the updated subject already has one with this name
-    subject_name_exists = session.exec(select(Subject).where(Subject.name == subject_update.name)).first()
-    subject_user_id_exists = session.exec(select(Subject).where(Subject.user_id == subject.user_id)).first()
-    if subject_name_exists and subject_user_id_exists:
+    subject_name_user_id_combo_exists = session.exec(select(Subject)
+                                                     .where(Subject.name == subject_update.name)
+                                                     .where(Subject.user_id == subject.user_id)).first()
+    if subject_name_user_id_combo_exists:
         logger.warning(f"User {subject.user_id} already has subject with name {subject_update.name}")
         raise HTTPException(status_code=400, detail="User already has subject with this name")
     
