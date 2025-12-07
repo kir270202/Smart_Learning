@@ -16,7 +16,7 @@ def create_subject(
     user_id_exists = session.exec(select(User).where(User.id == subject_create.user_id)).first()
     if not user_id_exists:
         logger.warning(f"User {subject_create.user_id} does not exist, no subject created")
-        raise HTTPException(status_code=400, detail="User does not exist")
+        raise HTTPException(status_code=422, detail="User does not exist")
     
     subject_user_id_comb_exist = session.exec(select(Subject)
                                               .where(Subject.name == subject_create.name)
@@ -81,7 +81,7 @@ def update_subject(
                                                      .where(Subject.user_id == subject.user_id)).first()
     if subject_name_user_id_combo_exists:
         logger.warning(f"User {subject.user_id} already has subject with name {subject_update.name}")
-        raise HTTPException(status_code=400, detail="User already has subject with this name")
+        raise HTTPException(status_code=409, detail="User already has subject with this name")
     
     subject.name = subject_update.name
     
